@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import userModel from '../models/userModels.js';
+import transporter from '../config/nodeMailer.js';
 
 export const register = async (req, res) => {
     const { name, email, password } = req.body;
@@ -30,6 +31,15 @@ export const register = async (req, res) => {
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
+
+        //Sending welcome email
+        const mailOptions = {
+            from: `"Shriganth Ravikumar" ${process.env.SENDER_EMAIL}`,
+            to: email,
+            subject: "Welcome to MERN-auth",
+            text: `Welcome to MERN-auth website. Your account has been created with email id: ${email}`,
+        }
+        await transporter.sendMail(mailOptions);
 
         return res.json({ success: true })
 
@@ -87,9 +97,81 @@ export const logout = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
-        return res.json({success: true, message: "Logged out"})
+        return res.json({ success: true, message: "Logged out" })
 
     } catch (error) {
-        return res.json({success: false, message: error.message})
+        return res.json({ success: false, message: error.message })
+    }
+}
+
+
+// Send Verification OTP to the User's Email
+export const sendVerifyOtp = async (req, res) => {
+    try {
+
+        const { userId } = req.body;
+
+        const user = await userModel.findById(userId);
+
+        if (user.isAccountVerified) {
+            return res.json({ success: false, message: "Account already verified" })
+        }
+
+        const otp = String(Math.floor(100000 + Math.random() * 900000));
+
+        user.verifyOtp = otp;
+        user.verifyOtpExpireAt = Date.now() + 24 * 60 * 60 * 1000;
+
+        await user.save();
+
+        const mailOptions = {
+            from: `Shriganth Ravikumar ${process.env.SENDER_EMAIL}`,
+            to: user.email,
+            subject: 'Account Verification OTP',
+            text: `Your OTP is ${otp}, Verify your account using this OTP.`,
+        }
+        await transporter.sendMail(mailOptions);
+
+        res.json({ success: true, message: "Verification OTP Sent on Email" });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+
+export const verifyEmail = async (req, res) => {
+    try {
+
+        const { userId, otp } = req.body;
+
+        if (!userId || !otp) {
+            res.json({ success: false, message: "Missing Details" })
+        }
+
+        const user = await userModel.findById(userId);
+
+        if (!user) {
+            res.json({ success: false, message: "User not found" })
+        }
+
+        if (user.verifyOtp === '' || user.verifyOtp === otp) {
+            res.json({ success: false, message: "Invalid OTP" })
+        }
+
+        if (user.verifyOtpExpireAt < Date.now()) {
+            res.json({ success: false, message: "OTP Expired" })
+        }
+
+        user.isAccountVerified = true;
+        user.verifyOtp = '';
+        user.verifyOtpExpireAt = 0;
+
+        await user.save();
+
+        return res.json({ success: true, message: "Email Verified Successfully" })
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
     }
 }
