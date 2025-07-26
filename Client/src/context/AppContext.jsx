@@ -1,25 +1,26 @@
-/* eslint-disable react-refresh/only-export-components */
 import axios from "axios";
-import { createContext, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
-
-export const AppContent = createContext()
+import { AppContent } from "./AppContent";
 
 export const AppContextProvider = (props) => {
 
-    const backendUrl = import.meta.env.VITE_BACKEND_URL
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const [isLoggedin, setIsLoggedin] = useState(false);
     const [userData, setUserData] = useState(false);
 
     const getUserData = async () => {
         try {
-            const {data} = await axios.get(backendUrl + '/api/user/data')
-            data.success ? setUserData(data.userData) : toast.error(data.message)
-        // eslint-disable-next-line no-unused-vars
+            const { data } = await axios.get(`${backendUrl}/api/user/data`);
+            if (data.success) {
+                setUserData(data.userData);
+            } else {
+                toast.error(data.message || "Failed to fetch user data");
+            }
+        
         } catch (error) {
-            // eslint-disable-next-line no-undef
-            toast.error(data.message)
+            toast.error(error?.response?.data?.message || error.message || "Something went wrong");
         }
     }
 

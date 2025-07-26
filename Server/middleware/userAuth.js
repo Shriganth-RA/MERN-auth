@@ -6,21 +6,22 @@ const userAuth = async (req, res, next) => {
         const { token } = req.cookies;
 
         if (!token) {
-            res.json({ success: false, message: "Not Authorized. Login Again." });
+            return res.status(404).json({ success: false, message: "Not Authorized. Login Again." });
         }
 
         const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
 
         if (tokenDecode.id) {
-            req.body.userId = tokenDecode.id;
+            // req.body.userId = tokenDecode.id;
+            req.user = { id: tokenDecode.id };
         } else {
-            res.json({ success: false, message: "Not Authorized. Login Again." });
+            return res.status(404).json({ success: false, message: "Not Authorized. Login Again." });
         }
 
         next();
 
     } catch (error) {
-        res.json({ success: false, mssage: error.mssage })
+        return res.status(400).json({ success: false, mssage: error.mssage })
     }
 }
 
