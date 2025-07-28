@@ -4,7 +4,7 @@ import { AppContent } from "../context/AppContent";
 
 const Header = () => {
 
-  const {userData} = useContext(AppContent);
+  const { userData } = useContext(AppContent);
 
   return (
     <div className="w-full flex flex-col items-center text-center">
