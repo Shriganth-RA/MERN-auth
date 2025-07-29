@@ -8,6 +8,7 @@ export const AppContextProvider = (props) => {
 
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [userEmail, setUserEmail] = useState("");
 
   const getUserData = useCallback(async () => {
     try {
@@ -63,6 +64,8 @@ export const AppContextProvider = (props) => {
     userData,
     setUserData,
     getUserData,
+    userEmail,
+    setUserEmail,
   };
 
   return (

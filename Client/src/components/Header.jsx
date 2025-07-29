@@ -8,7 +8,7 @@ const Header = () => {
 
   return (
     <div className="w-full flex flex-col items-center text-center">
-      <img className="w-50 m-auto" src={assets.header_img} alt="" />
+      <img className="w-50 m-auto rounded-full" src={assets.header_img} alt="" />
       <h1 className="flex items-center text-3xl font-medium mb-2 gap-2">
         Hey {userData ? userData.name : 'Developer'}!{" "}
         <img className="w-8 aspect-square" src={assets.hand_wave} alt="" />{" "}
