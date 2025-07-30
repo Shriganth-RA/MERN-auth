@@ -35,7 +35,7 @@ export const AppContextProvider = (props) => {
         `${backendUrl}/api/auth/is-authenticated`,
         { withCredentials: true }
       );
-    //   console.log("Auth response : " + data);
+      
       if (data.success) {
         setIsLoggedin(true);
         await getUserData();
@@ -53,6 +53,10 @@ export const AppContextProvider = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       await getAuthState();
+      const savedEmail = localStorage.getItem("userEmail");
+      if (savedEmail) {
+        setUserEmail(savedEmail);
+      }
     };
     fetchData();
   }, [getAuthState]);

@@ -19,8 +19,9 @@ const ResetPassword = () => {
 
       if (data.success) {
         toast.success(data.message);
-        navigate("/verify-reset-otp");
         setUserEmail(email);
+        localStorage.setItem("userEmail", email);
+        navigate("/verify-reset-otp");
       } else {
         toast.error(data.messge);
       }
